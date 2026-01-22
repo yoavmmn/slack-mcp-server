@@ -34,6 +34,9 @@ interface AddReactionArgs {
 interface GetChannelHistoryArgs {
   channel_id: string;
   limit?: number;
+  oldest?: string;
+  latest?: string;
+  cursor?: string;
 }
 
 interface GetThreadRepliesArgs {
@@ -163,11 +166,24 @@ export class SlackClient {
   async getChannelHistory(
     channel_id: string,
     limit: number = 10,
+    oldest?: string,
+    latest?: string,
+    cursor?: string,
   ): Promise<any> {
     const params = new URLSearchParams({
       channel: channel_id,
       limit: limit.toString(),
     });
+
+    if (oldest) {
+      params.append("oldest", oldest);
+    }
+    if (latest) {
+      params.append("latest", latest);
+    }
+    if (cursor) {
+      params.append("cursor", cursor);
+    }
 
     const response = await fetch(
       `https://slack.com/api/conversations.history?${params}`,
@@ -380,10 +396,13 @@ export function createSlackServer(slackClient: SlackClient): McpServer {
       inputSchema: {
         channel_id: z.string().describe("The ID of the channel"),
         limit: z.number().optional().default(10).describe("Number of messages to retrieve (default 10)"),
+        oldest: z.string().optional().describe("Unix timestamp (as string) for the oldest message to include (inclusive)"),
+        latest: z.string().optional().describe("Unix timestamp (as string) for the latest message to include (inclusive)"),
+        cursor: z.string().optional().describe("Pagination cursor for fetching next page of results"),
       },
     },
-    async ({ channel_id, limit }) => {
-      const response = await slackClient.getChannelHistory(channel_id, limit);
+    async ({ channel_id, limit, oldest, latest, cursor }) => {
+      const response = await slackClient.getChannelHistory(channel_id, limit, oldest, latest, cursor);
       return {
         content: [{ type: "text", text: JSON.stringify(response) }],
       };
