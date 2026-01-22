@@ -264,6 +264,93 @@ describe('SlackClient', () => {
     );
   });
 
+  test('getChannelHistory with oldest parameter', async () => {
+    const mockResponse = {
+      ok: true,
+      messages: [],
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    await slackClient.getChannelHistory('C123456', 10, '1704067200');
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringMatching(/oldest=1704067200/),
+      expect.any(Object)
+    );
+  });
+
+  test('getChannelHistory with latest parameter', async () => {
+    const mockResponse = {
+      ok: true,
+      messages: [],
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    await slackClient.getChannelHistory('C123456', 10, undefined, '1704672000');
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringMatching(/latest=1704672000/),
+      expect.any(Object)
+    );
+  });
+
+  test('getChannelHistory with cursor parameter', async () => {
+    const mockResponse = {
+      ok: true,
+      messages: [],
+      response_metadata: {
+        next_cursor: 'next_page_cursor',
+      },
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    await slackClient.getChannelHistory('C123456', 10, undefined, undefined, 'dXNlcjpVMDYxTkZUVDI=');
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringMatching(/cursor=dXNlcjpVMDYxTkZUVDI%3D/),
+      expect.any(Object)
+    );
+  });
+
+  test('getChannelHistory with all time and pagination parameters', async () => {
+    const mockResponse = {
+      ok: true,
+      messages: [
+        {
+          type: 'message',
+          user: 'U123456',
+          text: 'Hello',
+          ts: '1704200000.123456',
+        },
+      ],
+      response_metadata: {
+        next_cursor: 'next_page_cursor',
+      },
+    };
+
+    mockFetch.mockResolvedValueOnce({
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    const result = await slackClient.getChannelHistory('C123456', 50, '1704067200', '1704672000', 'cursor123');
+
+    expect(result).toEqual(mockResponse);
+    const fetchUrl = mockFetch.mock.calls[0][0] as string;
+    expect(fetchUrl).toContain('oldest=1704067200');
+    expect(fetchUrl).toContain('latest=1704672000');
+    expect(fetchUrl).toContain('cursor=cursor123');
+    expect(fetchUrl).toContain('limit=50');
+  });
+
   test('getThreadReplies successful response', async () => {
     const mockResponse = {
       ok: true,
