@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "description": "MCP server for interacting with Slack",
   "license": "MIT",
-  "author": "Actively AI (https://actively.ai)",
-  "homepage": "https://actively.ai",
+  "author": "yoavmmn",
+  "homepage": "https://github.com/yoavmmn/slack-mcp-server",
   "repository": {
     "type": "git",
-    "url": "https://github.com/actively-ai/slack-mcp-server"
+    "url": "https://github.com/yoavmmn/slack-mcp-server"
   },
-  "bugs": "https://github.com/actively-ai/slack-mcp-server/issues",
+  "bugs": "https://github.com/yoavmmn/slack-mcp-server/issues",
   "type": "module",
   "bin": {
     "slack-mcp": "dist/index.js"

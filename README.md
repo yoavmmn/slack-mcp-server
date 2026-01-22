@@ -135,7 +135,7 @@ npm run build
 
 ### Global Installation (NPM)
 ```bash
-npm install -g @activelyai/slack-mcp-server
+npm install -g @yoavmmn/slack-mcp-server
 ```
 
 ### Docker Installation
